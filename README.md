@@ -204,7 +204,7 @@ MIT License
 
 ## 👨‍💻 Author
 
-**Pascal** - [GitHub](https://github.com/pascal-hq)
+**Pascal Muthama** - [GitHub](https://github.com/pascal-hq)
 
 ## 📊 Badges
 
