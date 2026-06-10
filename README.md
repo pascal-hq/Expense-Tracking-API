@@ -159,18 +159,20 @@ curl -X POST https://expense-tracking-api-tc7f.onrender.com/expenses \
 ## 📁 Project Structure
 
 
-📁 Project Structure
-expense-tracker-api/
-├── main.py # FastAPI app with all endpoints
-├── database.py # Database connection & session
-├── models.py # SQLAlchemy ORM models
-├── schemas.py # Pydantic validation schemas
-├── auth.py # JWT & password functions
-├── expenses.db # SQLite database (auto-generated)
-├── requirements.txt # Dependencies
-├── .env # Environment variables
-└── README.md # This file
+## 📁 Project Structure
 
+```bash
+expense-tracker-api/
+├── main.py              # FastAPI app with all endpoints
+├── database.py          # Database connection & session
+├── models.py            # SQLAlchemy ORM models
+├── schemas.py           # Pydantic validation schemas
+├── auth.py              # JWT & password functions
+├── expenses.db          # SQLite database (auto-generated)
+├── requirements.txt     # Dependencies
+├── .env                 # Environment variables
+└── README.md            # This file
+```
 
 ## 📚 Documentation
 
