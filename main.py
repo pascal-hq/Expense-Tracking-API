@@ -63,7 +63,7 @@ def hello():
     return {"message": "Expense API with Authentication"}
 
 @app.post("/register", response_model=UserResponse)
-@limiter.limit("5/minute")  # Limit registrations
+@limiter.limit("5/minute")
 def register(request: Request, user: UserCreate, db: Session = Depends(get_db)):
     existing = db.query(UserModel).filter(UserModel.email == user.email).first()
     if existing:
@@ -77,7 +77,7 @@ def register(request: Request, user: UserCreate, db: Session = Depends(get_db)):
     return db_user
 
 @app.post("/token", response_model=TokenResponse)
-@limiter.limit("10/minute")  # Limit login attempts
+@limiter.limit("10/minute")
 def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = db.query(UserModel).filter(UserModel.email == form_data.username).first()
     if not user or not verify_password(form_data.password, user.hashed_password):
@@ -86,8 +86,9 @@ def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), db
     token = create_access_token(data={"sub": user.email})
     return {"access_token": token, "token_type": "bearer"}
 
+# CREATE single expense
 @app.post("/expenses", response_model=ExpenseResponse)
-@limiter.limit("10/minute")  # Max 10 expenses per minute
+@limiter.limit("10/minute")
 def create_expense(
     request: Request,
     expense: ExpenseCreate,
@@ -100,48 +101,60 @@ def create_expense(
     db.refresh(db_expense)
     return db_expense
 
+# BULK CREATE - Add multiple expenses at once
+@app.post("/expenses/bulk", response_model=List[ExpenseResponse])
+@limiter.limit("5/minute")  # Stricter limit for bulk operations
+def create_multiple_expenses(
+    request: Request,
+    expenses: List[ExpenseCreate],  # Accepts an array of expenses
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user)
+):
+    # Create all expense objects
+    db_expenses = []
+    for expense in expenses:
+        db_expense = ExpenseModel(**expense.dict(), owner_id=current_user.id)
+        db_expenses.append(db_expense)
+    
+    # Add all to database in one transaction (more efficient)
+    db.add_all(db_expenses)
+    db.commit()
+    
+    # Refresh each to get their generated IDs
+    for db_expense in db_expenses:
+        db.refresh(db_expense)
+    
+    return db_expenses
+
 # GET endpoint with filtering and pagination
 @app.get("/expenses")
-@limiter.limit("30/minute")  # Higher limit for reads
+@limiter.limit("30/minute")
 def get_my_expenses(
     request: Request,
-    # Pagination parameters
     skip: int = 0,
     limit: int = 10,
-    
-    # Filtering parameters
     category: Optional[str] = None,
     start_date: Optional[date] = None,
     end_date: Optional[date] = None,
     min_amount: Optional[float] = None,
     max_amount: Optional[float] = None,
-    
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user)
 ):
-    # Base query: only this user's expenses
     query = db.query(ExpenseModel).filter(ExpenseModel.owner_id == current_user.id)
     
-    # Apply filters (only if provided)
     if category:
         query = query.filter(ExpenseModel.category == category)
-    
     if start_date:
         query = query.filter(ExpenseModel.date >= start_date)
-    
     if end_date:
         query = query.filter(ExpenseModel.date <= end_date)
-    
     if min_amount:
         query = query.filter(ExpenseModel.amount >= min_amount)
-    
     if max_amount:
         query = query.filter(ExpenseModel.amount <= max_amount)
     
-    # Get total count before pagination
     total = query.count()
-    
-    # Apply pagination and execute
     expenses = query.offset(skip).limit(limit).all()
     
     return {
@@ -153,7 +166,7 @@ def get_my_expenses(
 
 # ANALYTICS ENDPOINT
 @app.get("/expenses/analytics/summary")
-@limiter.limit("5/minute")  # Stricter limit for analytics (heavier query)
+@limiter.limit("5/minute")
 def get_expense_analytics(
     request: Request,
     category: Optional[str] = None,
@@ -162,10 +175,8 @@ def get_expense_analytics(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user)
 ):
-    # Base query
     query = db.query(ExpenseModel).filter(ExpenseModel.owner_id == current_user.id)
     
-    # Apply same filters as main endpoint
     if category:
         query = query.filter(ExpenseModel.category == category)
     if start_date:
@@ -173,7 +184,6 @@ def get_expense_analytics(
     if end_date:
         query = query.filter(ExpenseModel.date <= end_date)
     
-    # Get all expenses
     expenses = query.all()
     
     if not expenses:
@@ -188,19 +198,16 @@ def get_expense_analytics(
             "by_month": {}
         }
     
-    # Calculate analytics
     amounts = [e.amount for e in expenses]
     total = sum(amounts)
     average = total / len(amounts)
     highest = max(amounts)
     lowest = min(amounts)
     
-    # Spending by category
     by_category = {}
     for e in expenses:
         by_category[e.category] = by_category.get(e.category, 0) + e.amount
     
-    # Spending by month (YYYY-MM format)
     by_month = {}
     for e in expenses:
         month_key = e.date.strftime("%Y-%m")
@@ -218,7 +225,7 @@ def get_expense_analytics(
 
 # CSV EXPORT ENDPOINT
 @app.get("/expenses/export/csv")
-@limiter.limit("3/minute")  # Strictest limit for file generation
+@limiter.limit("3/minute")
 def export_expenses_csv(
     request: Request,
     category: Optional[str] = None,
@@ -227,7 +234,6 @@ def export_expenses_csv(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user)
 ):
-    # Build query with same filters
     query = db.query(ExpenseModel).filter(ExpenseModel.owner_id == current_user.id)
     
     if category:
@@ -239,14 +245,11 @@ def export_expenses_csv(
     
     expenses = query.all()
     
-    # Create CSV in memory
     output = StringIO()
     writer = csv.writer(output)
     
-    # Write headers
     writer.writerow(["ID", "Amount", "Description", "Category", "Date"])
     
-    # Write data rows
     for expense in expenses:
         writer.writerow([
             expense.id,
@@ -256,7 +259,6 @@ def export_expenses_csv(
             expense.date.strftime("%Y-%m-%d")
         ])
     
-    # Prepare response
     output.seek(0)
     filename = f"expenses_{date.today()}.csv"
     
