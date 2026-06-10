@@ -79,15 +79,17 @@ GET /expenses?category=Food&start_date=2026-06-01&end_date=2026-06-30&min_amount
   }
 }
 
+```
+## 🏁 Getting Started
 
-🏁 Getting Started
-Prerequisites
-Python 3.11+
+### Prerequisites
 
-pip
+- Python 3.11 or higher
+- pip package manager
 
+### Installation
 
-Installation
+```bash
 # Clone the repository
 git clone https://github.com/pascal-hq/Expense-Tracking-API.git
 cd Expense-Tracking-API
@@ -105,7 +107,7 @@ echo "ALGORITHM=HS256" >> .env
 
 # Run the server
 uvicorn main:app --reload
-
+```
 🧪 Testing the API
 PowerShell
 # Register
