@@ -110,6 +110,7 @@ uvicorn main:app --reload
 ```
 🧪 Testing the API
 PowerShell
+```powershell
 # Register
 $body = @{email="test@example.com"; password="secret123"} | ConvertTo-Json
 Invoke-RestMethod -Uri "https://expense-tracking-api-tc7f.onrender.com/register" -Method POST -ContentType "application/json" -Body $body
@@ -126,8 +127,9 @@ Invoke-RestMethod -Uri "https://expense-tracking-api-tc7f.onrender.com/expenses"
 
 # Get expenses
 Invoke-RestMethod -Uri "https://expense-tracking-api-tc7f.onrender.com/expenses" -Headers $headers
-
+```
 cURL
+```powershell
 # Register
 curl -X POST https://expense-tracking-api-tc7f.onrender.com/register \
   -H "Content-Type: application/json" \
@@ -143,14 +145,19 @@ curl -X POST https://expense-tracking-api-tc7f.onrender.com/expenses \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"amount":25.50,"description":"Lunch","category":"Food","date":"2026-06-10"}'
+```
+## 🔒 Security Features
 
-🔒 Security Features
-Feature	Implementation
-Password Storage	bcrypt hashing
-Authentication	JWT tokens (60-minute expiration)
-Authorization	User isolation via owner_id
-Rate Limiting	5-30 requests/minute
-Request Logging	All requests with timestamps
+| Feature | Implementation |
+|---------|----------------|
+| Password Storage | bcrypt hashing |
+| Authentication | JWT tokens (60-minute expiration) |
+| Authorization | User isolation via `owner_id` |
+| Rate Limiting | 5-30 requests/minute |
+| Request Logging | All requests with timestamps |
+
+## 📁 Project Structure
+
 
 📁 Project Structure
 expense-tracker-api/
@@ -163,46 +170,44 @@ expense-tracker-api/
 ├── requirements.txt     # Dependencies
 ├── .env                 # Environment variables
 └── README.md            # This file
-📚 Documentation
+
+
+## 📚 Documentation
+
 Once running, visit:
 
-Swagger UI: http://localhost:8000/docs
+- Swagger UI: `http://localhost:8000/docs`
+- ReDoc: `http://localhost:8000/redoc`
 
-ReDoc: http://localhost:8000/redoc
+**Live:** https://expense-tracking-api-tc7f.onrender.com/docs
 
-Live: https://expense-tracking-api-tc7f.onrender.com/docs
+## 🚀 Deployment
 
-🚀 Deployment
-Deployed on Render (free tier):
+Deployed on **Render** (free tier):
 
-Auto-deploys on push to main branch
+- Auto-deploys on push to `main` branch
+- PostgreSQL upgrade ready with `DATABASE_URL` env var
 
-PostgreSQL upgrade ready with DATABASE_URL env var
+## 🤝 Contributing
 
-🤝 Contributing
-Fork the repository
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-Create a feature branch (git checkout -b feature/amazing-feature)
+## 📄 License
 
-Commit changes (git commit -m 'Add amazing feature')
-
-Push to branch (git push origin feature/amazing-feature)
-
-Open a Pull Request
-
-📄 License
 MIT License
 
-👨‍💻 Author
-Pascal - GitHub
+## 👨‍💻 Author
 
-📊 Badges
-https://img.shields.io/badge/FastAPI-0.115-blue
-https://img.shields.io/badge/Python-3.11-green
-https://img.shields.io/badge/Database-SQLite-blue
-https://img.shields.io/badge/Deployed-Render-purple
-https://img.shields.io/badge/Rate%2520Limiting-slowapi-orange
-https://img.shields.io/badge/Auth-JWT-red
-https://img.shields.io/badge/License-MIT-yellow
+**Pascal** - [GitHub](https://github.com/pascal-hq)
+
+## 📊 Badges
+
+![FastAPI](https://img.shields.io/badge/FastAPI-0.115-blue) ![Python](https://img.shields.io/badge/Python-3.11-green) ![SQLite](https://img.shields.io/badge/Database-SQLite-blue) ![Render](https://img.shields.io/badge/Deployed-Render-purple) ![Rate Limiting](https://img.shields.io/badge/Rate%20Limiting-slowapi-orange) ![JWT](https://img.shields.io/badge/Auth-JWT-red) ![License](https://img.shields.io/badge/License-MIT-yellow)
+
+---
 
 ⭐ Star this repo if you find it useful!
